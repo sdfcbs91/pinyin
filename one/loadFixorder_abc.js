@@ -1,4 +1,5 @@
 // 浏览fixorder_abc.dat格式的js
+//地址:C:\Program Files\Tencent\QQPinyin\4.7.2065.400\CandOrder\fixorder_abc.dat
 loadFixorder = {
     src: "fixorder_abc.dat",
     //[aeo]不需删除,单个其他字母删除
