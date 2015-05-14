@@ -69,24 +69,73 @@ common.pinyin.makeWord = function(str) {
 common.pinyin.verifyInitials = function (arr, str) {
     if (!arr || !str) return false;
     if (arr.length < 1) return false;
-    var temp = "", num = 0;
+    var temp = "", num = 0, str = str.toLowerCase();
+
     var funstr = function (val, n) {
-        for (var j = n; j < str.length; j++) {
-            if (val.indexOf(str[j]) > -1) {
-                return j;
+        //汉字集合数组
+        var valWArr = val.split(/\w+/g),
+        //单词集合数组
+            valwArr = val.match(/\w+/g),
+            reW = -1,
+            rew = -1;
+
+        if (valWArr) {
+            var val = '';
+            for (var i = 0; i < valWArr.length; i++) {
+                val += valWArr[i];
+            }
+            for (var j = n; j < str.length; j++) {
+                if (val.indexOf(str[j]) > -1) {
+                    
+                    reW = j;
+                    break;
+                }
             }
         }
+        if (valwArr) {
+            for (var i = 0; i < valwArr.length; i++) {
+                var val = valwArr[i];
+                for (var j = n; j < str.length; j++) {
+                    if (val === str[j]) {
+                        
+                        rew = j;
+                        break;
+                    }
+                }
+            }
+        }
+        if (rew !== -1 && reW !== -1) {
+            if (rew > reW) {
+                return reW;
+            } else {
+                return rew;
+            }
+        } else if (rew !== -1 ) {
+            return rew;
+        } else if (reW !== -1) {
+            return reW;
+        } 
         return -1;
-    }
+        
+    };
 
     for (var i = 0; i < arr.length; i++) {
-        var t = funstr(arr[i], num);
+        var t = funstr(arr[i].toLowerCase(), num);
         if (t === -1) {
             return false;
         } else {
-            num = t+1;
+                
+            num = t + 1;
+            if (num >= str.length) {
+                if (arr.length - 1 === i) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         }
     }
+    
     return true;
 }
 
