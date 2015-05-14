@@ -3,7 +3,7 @@
 loadFixorder = {
     src: "fixorder_abc.dat",
     //[aeo]不需删除,单个其他字母删除
-    exception:"AEO"
+    exception:""//AEO
 }
 
 loadFixorder.createIframe = function () {
@@ -46,13 +46,13 @@ loadFixorder.loadIframe = function (iframe, errorSrc) {
             temp = [];
         name[0] = name[0][0].toUpperCase() + name[0].substring(1).toLowerCase();
         if (name[0].length === 1) {
-            if (loadFixorder.exception.indexOf(name[0]) > -1) {
+            //if (loadFixorder.exception.indexOf(name[0]) > -1) {  //取消 删除单字母数组拼凑
                 temp.push($.trim(name[0]));
                 temp.push($.trim(arr[1]));
                 re.push(temp);
                 reStr += '["' + $.trim(name[0]) + '",';
-                reStr += '"' + arr[1].replace(/\s/g,"") + '"],';
-            }
+                reStr += '"' + arr[1].replace(/\s/g, "") + '"],';
+           // }
         } else {
             temp.push($.trim(name[0]));
             temp.push($.trim(arr[1]));
@@ -61,12 +61,13 @@ loadFixorder.loadIframe = function (iframe, errorSrc) {
             reStr += '"' + arr[1].replace(/\s/g, "") + '"],';
         }
     }
+    
     for (var i = 0; i < arr1.length; i++) {
         arr1[i] = arr1[i].replace("\n", "");
         matchArr(arr1[i])
     }
     reStr += ']';
-    var $text = $("<textarea width='500' height='500'></textarea>").appendTo("body");
-    console.log(re)
+    var $text = $("<textarea  style='width:500px;height:500px'></textarea>").appendTo("body");
+    //console.log(re)
     $text.html(reStr);
 }
