@@ -42,15 +42,26 @@ common.pinyin.makeWord = function(str) {
         var str = str.replace(/\W/g, "");
         if (str.length < 1) return [];
         var s = str[0].toUpperCase() + str.substring(1).toLowerCase();
+        //取消全拼匹配
+        //for (var i = 0; i < p.length; i++) {
+        //    if (p[i][0] === s) {
+        //        return p[i][1];
+        //    }
+        //}
+        var re = '';
+        //全拼模糊匹配
         for (var i = 0; i < p.length; i++) {
-            if (p[i][0] === s) {
-                return p[i][1];
+            if (p[i][0].indexOf(s)>-1) {
+                re +=p[i][1];
             }
         }
-        return [];
+        
+        return re;
+        
+        
     }
     if (strArr.length < 1) {
-        return [];
+        return '';
     }
     for (var i = 0; i < strArr.length; i++) {
         var temp = matchArr(strArr[i]);
