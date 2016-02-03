@@ -156,7 +156,7 @@ if (!String.prototype.trim) {
 /*
 *把结果中的中文反译成拼音的全拼
 *参数:[搜索时输入的英文拼音][被匹配的结果字符串]
-*返回:对应的拼音全拼
+*返回:true/false
 */
 common.pinyin.makeWord2 = function (ens, cns) {
     if (arguments.length < 2) return false;
