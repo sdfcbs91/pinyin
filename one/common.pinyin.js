@@ -86,7 +86,6 @@ common.pinyin.makeWord1 = function (str) {
     var self = this;
     var words = this.words;
     var re = []; //二维数组
-    var json = { child: [] };
 
     var setArr = function (str, arr, treestr) {
         var temp = "";
@@ -104,7 +103,7 @@ common.pinyin.makeWord1 = function (str) {
                 for (var j = 0; j < r.length; j++) {
                     var r_len = r[j].length;
                     for (var i = 0; i < d.length; i++) {
-                        if(d[i][0].length === r_len && d[i][0].toLocaleLowerCase() === r[j]){ // 比单纯的比较(d[i][0].toLocaleLowerCase() === r[j])效率提升了接近50% **该功能主要时间花在该循环的判断上面
+                        if (d[i][0].length === r_len && d[i][0] === r[j]) { // 加上长度比较,较字符串比较效率略微提升
                             rs.push(d[i][1]);
                             break;
                         }
@@ -117,9 +116,13 @@ common.pinyin.makeWord1 = function (str) {
             return;
         }
         for (var i = 0; i < words.length; i++) {
+            if (words[i].length > str.length) continue; //避免多余判断(indexof),增加长度比较,效率略微提升
             if (str.indexOf(words[i]) === 0) {   //new RegExp("^" + words[i]).test(str) 此验证规则执行效率相对的indexof显得巨慢,故采用indexof 
                 var ctr = str.substring(words[i].length, str.length);
-                setArr(ctr, arr, temp + "." + words[i]);
+                var key = words[i].replace(/^\w/, function (m) {  //首字母大写,避免比较时候大写(d[i][0].toLocaleLowerCase()) 执行效率(循环的判断越多,越慢)提升50%
+                    return m.toUpperCase();
+                });
+                setArr(ctr, arr, temp + "." + key);
             }
         }
     }
@@ -131,7 +134,7 @@ common.pinyin.makeWord1 = function (str) {
     console.log('spend time:' + (new Date().getTime() - t));
     return re;
 }
-//该函数为makeWord1的原形版,代码略多,执行效率慢一点点点
+//该函数为makeWord1的原形版,代码略多,执行效率不分上下~~
 common.pinyin.makeWord_1 = function (str) {
     if (!str) return [];
     var t = new Date().getTime();
@@ -142,8 +145,12 @@ common.pinyin.makeWord_1 = function (str) {
     var json = { child: [] };
     var setJsonTree = function (str, arr) {
         for (var i = 0; i < words.length; i++) {
+            if (words[i].length > str.length) continue;
             if (str.indexOf(words[i]) === 0) {
-                var t = { key: words[i], child: [] };
+                var key = words[i].replace(/^\w/, function (m) {
+                    return m.toUpperCase();
+                });
+                var t = { key: key, child: [] };
                 arr.push(t);
                 var ctr = str.substring(words[i].length, str.length);
                 if (ctr.length > 0) {
@@ -171,7 +178,7 @@ common.pinyin.makeWord_1 = function (str) {
                 for (var j = 0; j < r.length; j++) {
                     var r_len = r[j].length;
                     for (var i = 0; i < d.length; i++) {
-                        if (d[i][0].length === r_len && d[i][0].toLocaleLowerCase() === r[j]) {
+                        if (d[i][0].length === r_len && d[i][0] === r[j]) {
                             rs.push(d[i][1]);
                             break;
                         }
