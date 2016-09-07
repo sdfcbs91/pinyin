@@ -1,7 +1,8 @@
 ﻿/*
 * demo1:common.pinyin.verifyInitials(common.pinyin.makeWord('wo ai ni'),'我哎你');空格规则的全拼
 * demo2:common.pinyin.verifyInitials(common.pinyin.makeInitials('wan'),'我哎你');首字母
-* demo3:common.pinyin.verifyInitials1(common.pinyin.makeWord1('faker'),"发可二");全拼+首字母
+* demo3:common.pinyin.verifyInitials1(common.pinyin.makeWord1('wanglihongzhoujielunliudehua'),"王力宏周杰伦刘德华");全拼+首字母
+* demo3_初版:common.pinyin.verifyInitials1(common.pinyin.makeWord_1('wanglihongzhoujielunliudehua'),"王力宏周杰伦刘德华");全拼+首字母
 */
 if (!common) {
     var common = {};
@@ -80,6 +81,60 @@ common.pinyin.makeWord = function(str) {
 //全拼+首字母搜索    根据拼音的整体字符串获取对应的数组(makeWord加强版) 无需空格区分,全匹配
 common.pinyin.makeWord1 = function (str) {
     if (!str) return [];
+    var t = new Date().getTime();
+    str = str.replace(/\s+/g, '');
+    var self = this;
+    var words = this.words;
+    var re = []; //二维数组
+    var json = { child: [] };
+
+    var setArr = function (str, arr, treestr) {
+        var temp = "";
+        if (treestr) { //执行效率比typeof treestr !=="undefined"略高
+            temp = treestr;
+        }
+        if (str.length < 1) {
+
+            //把该字符串拆分成数组,并放到一维数组里面
+            var r = temp.substring(1, temp.length).split('.');
+
+            //获得对应的中文数组
+            var rCh = function (d) {
+                var rs = [];
+                for (var j = 0; j < r.length; j++) {
+                    var r_len = r[j].length;
+                    for (var i = 0; i < d.length; i++) {
+                        if(d[i][0].length === r_len && d[i][0].toLocaleLowerCase() === r[j]){ // 比单纯的比较(d[i][0].toLocaleLowerCase() === r[j])效率提升了接近50% **该功能主要时间花在该循环的判断上面
+                            rs.push(d[i][1]);
+                            break;
+                        }
+                    }
+                }
+                return rs;
+            } (self.data);
+
+            arr.push(rCh);
+            return;
+        }
+        for (var i = 0; i < words.length; i++) {
+            if (str.indexOf(words[i]) === 0) {   //new RegExp("^" + words[i]).test(str) 此验证规则执行效率相对的indexof显得巨慢,故采用indexof 
+                var ctr = str.substring(words[i].length, str.length);
+                setArr(ctr, arr, temp + "." + words[i]);
+            }
+        }
+    }
+
+    setArr(str, re);
+
+    //加上首字母的数组
+    re.push(this.makeInitials(str));
+    console.log('spend time:' + (new Date().getTime() - t));
+    return re;
+}
+//该函数为makeWord1的原形版,代码略多,执行效率慢一点点点
+common.pinyin.makeWord_1 = function (str) {
+    if (!str) return [];
+    var t = new Date().getTime();
     str = str.replace(/\s+/g, '');
     var self = this;
     var words = this.words;
@@ -87,7 +142,7 @@ common.pinyin.makeWord1 = function (str) {
     var json = { child: [] };
     var setJsonTree = function (str, arr) {
         for (var i = 0; i < words.length; i++) {
-            if (new RegExp("^" + words[i]).test(str)) {
+            if (str.indexOf(words[i]) === 0) {
                 var t = { key: words[i], child: [] };
                 arr.push(t);
                 var ctr = str.substring(words[i].length, str.length);
@@ -114,8 +169,9 @@ common.pinyin.makeWord1 = function (str) {
             var rCh = function (d) {
                 var rs = [];
                 for (var j = 0; j < r.length; j++) {
+                    var r_len = r[j].length;
                     for (var i = 0; i < d.length; i++) {
-                        if (d[i][0].toLocaleLowerCase() === r[j]) {
+                        if (d[i][0].length === r_len && d[i][0].toLocaleLowerCase() === r[j]) {
                             rs.push(d[i][1]);
                             break;
                         }
@@ -124,6 +180,7 @@ common.pinyin.makeWord1 = function (str) {
                 return rs;
             } (self.data);
             arr.push(rCh);
+            return;
         }
         for (var i = 0; i < json.child.length; i++) {
             setArrToA2(json.child[i], arr, temp);
@@ -136,8 +193,10 @@ common.pinyin.makeWord1 = function (str) {
     setArrToA2(json, re);
     //加上首字母的数组
     re.push(this.makeInitials(str));
+    console.log('spend time:' + (new Date().getTime() - t));
     return re;
 }
+
 //按顺序的 汉字数组匹配指定汉字 基于verifyInitials
 /*
 *参数:汉字2维数组,指定汉字
