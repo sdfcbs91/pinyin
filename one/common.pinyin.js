@@ -136,10 +136,12 @@ common.pinyin.makeWord1 = function (str) {
 
     }
 
+    //生成json树
     setJsonTree(str, json.child);
-
+    //根据json生成二维数组
     setArrToA2(json, re);
-
+    //加上首字母的数组
+    re.push(this.makeInitials(str));
     return re;
 }
 //按顺序的 汉字数组匹配指定汉字 基于verifyInitials
