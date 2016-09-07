@@ -63,10 +63,7 @@ common.pinyin.makeWord = function(str) {
                 re +=p[i][1];
             }
         }
-        
         return re;
-        
-        
     }
     if (strArr.length < 1) {
         return '';
@@ -97,7 +94,6 @@ common.pinyin.makeWord1 = function (str) {
                 if (ctr.length > 0) {
                     setJsonTree(ctr, t.child);
                 }
-
             }
         }
     }
@@ -120,7 +116,6 @@ common.pinyin.makeWord1 = function (str) {
                 for (var j = 0; j < r.length; j++) {
                     for (var i = 0; i < d.length; i++) {
                         if (d[i][0].toLocaleLowerCase() === r[j]) {
-                            //return d[i][1];
                             rs.push(d[i][1]);
                             break;
                         }
@@ -133,7 +128,6 @@ common.pinyin.makeWord1 = function (str) {
         for (var i = 0; i < json.child.length; i++) {
             setArrToA2(json.child[i], arr, temp);
         }
-
     }
 
     //生成json树
