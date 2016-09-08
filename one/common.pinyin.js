@@ -98,19 +98,29 @@ common.pinyin.makeWord1 = function (str) {
             var r = temp.substring(1, temp.length).split('.');
 
             //获得对应的中文数组
-            var rCh = function (d) {
+            /*var rCh = function (d) { //匿名执行效率慢一半
                 var rs = [];
                 for (var j = 0; j < r.length; j++) {
-                    var r_len = r[j].length;
                     for (var i = 0; i < d.length; i++) {
-                        if (d[i][0].length === r_len && d[i][0] === r[j]) { // 加上长度比较,较字符串比较效率略微提升
+                        if (d[i][0] === r[j]) { 
                             rs.push(d[i][1]);
                             break;
                         }
                     }
                 }
                 return rs;
-            } (self.data);
+            } (self.data);*/
+
+            var rCh = [],
+                d = self.data;
+            for (var j = 0; j < r.length; j++) {
+                for (var i = 0; i < d.length; i++) {
+                    if (d[i][0] === r[j]) { 
+                        rCh.push(d[i][1]);
+                        break;
+                    }
+                }
+            }
 
             arr.push(rCh);
             return;
@@ -119,7 +129,7 @@ common.pinyin.makeWord1 = function (str) {
             if (words[i].length > str.length) continue; //避免多余判断(indexof),增加长度比较,效率略微提升
             if (str.indexOf(words[i]) === 0) {   //new RegExp("^" + words[i]).test(str) 此验证规则执行效率相对的indexof显得巨慢,故采用indexof 
                 var ctr = str.substring(words[i].length, str.length);
-                var key = words[i].replace(/^\w/, function (m) {  //首字母大写,避免比较时候大写(d[i][0].toLocaleLowerCase()) 执行效率(循环的判断越多,越慢)提升50%
+                var key = words[i].replace(/^\w/, function (m) {  //首字母大写,避免比较时候大写(d[i][0].toLocaleLowerCase()) 执行效率(循环的判断越多,越慢)提升
                     return m.toUpperCase();
                 });
                 setArr(ctr, arr, temp + "." + key);
@@ -137,7 +147,7 @@ common.pinyin.makeWord1 = function (str) {
 //该函数为makeWord1的原形版,代码略多,执行效率不分上下~~
 common.pinyin.makeWord_1 = function (str) {
     if (!str) return [];
-    var t = new Date().getTime();
+   
     str = str.replace(/\s+/g, '');
     var self = this;
     var words = this.words;
@@ -173,19 +183,16 @@ common.pinyin.makeWord_1 = function (str) {
             //把该字符串拆分成数组,并放到一维数组里面
             var r = temp.substring(1, temp.length).split('.');
             //获得对应的中文数组
-            var rCh = function (d) {
-                var rs = [];
-                for (var j = 0; j < r.length; j++) {
-                    var r_len = r[j].length;
-                    for (var i = 0; i < d.length; i++) {
-                        if (d[i][0].length === r_len && d[i][0] === r[j]) {
-                            rs.push(d[i][1]);
-                            break;
-                        }
+            var rCh = [],
+                d = self.data;
+            for (var j = 0; j < r.length; j++) {
+                for (var i = 0; i < d.length; i++) {
+                    if (d[i][0] === r[j]) { 
+                        rCh.push(d[i][1]);
+                        break;
                     }
                 }
-                return rs;
-            } (self.data);
+            }
             arr.push(rCh);
             return;
         }
@@ -194,13 +201,19 @@ common.pinyin.makeWord_1 = function (str) {
         }
     }
 
+    var t = new Date().getTime();
     //生成json树
     setJsonTree(str, json.child);
+    console.log('spend time:' + (new Date().getTime() - t));
+
+    var t = new Date().getTime();
     //根据json生成二维数组
     setArrToA2(json, re);
+    console.log('spend time:' + (new Date().getTime() - t));
+
     //加上首字母的数组
     re.push(this.makeInitials(str));
-    console.log('spend time:' + (new Date().getTime() - t));
+    
     return re;
 }
 
