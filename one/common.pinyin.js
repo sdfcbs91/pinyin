@@ -3,6 +3,7 @@
 * demo2:common.pinyin.verifyInitials(common.pinyin.makeInitials('wan'),'我哎你');首字母
 * demo3:common.pinyin.verifyInitials1(common.pinyin.makeWord1('wanglihongzhoujielunliudehua'),"王力宏周杰伦刘德华");全拼+首字母
 * demo3_初版:common.pinyin.verifyInitials1(common.pinyin.makeWord_1('wanglihongzhoujielunliudehua'),"王力宏周杰伦刘德华");全拼+首字母
+* demo3:common.pinyin.verifyInitials1(common.pinyin.makeWord1('wanglihong'),'W王**刘德华**力**周杰伦**红');
 */
 if (!common) {
     var common = {};
@@ -82,16 +83,15 @@ common.pinyin.makeWord = function(str) {
 common.pinyin.makeWord1 = function (str) {
     if (!str) return [];
     var t = new Date().getTime();
+    var loop = 0;
     str = str.replace(/\s+/g, '');
     var self = this;
     var words = this.words;
     var re = []; //二维数组
 
     var setArr = function (str, arr, treestr) {
-        var temp = "";
-        if (treestr) { //执行效率比typeof treestr !=="undefined"略高
-            temp = treestr;
-        }
+        var temp = treestr ? treestr : "";//执行效率比typeof treestr !=="undefined"略高（三目与IF速度一样）
+       
         if (str.length < 1) {
 
             //把该字符串拆分成数组,并放到一维数组里面
@@ -99,23 +99,24 @@ common.pinyin.makeWord1 = function (str) {
 
             //获得对应的中文数组
             /*var rCh = function (d) { //匿名执行效率慢一半
-                var rs = [];
-                for (var j = 0; j < r.length; j++) {
-                    for (var i = 0; i < d.length; i++) {
-                        if (d[i][0] === r[j]) { 
-                            rs.push(d[i][1]);
-                            break;
-                        }
-                    }
-                }
-                return rs;
+            var rs = [];
+            for (var j = 0; j < r.length; j++) {
+            for (var i = 0; i < d.length; i++) {
+            if (d[i][0] === r[j]) { 
+            rs.push(d[i][1]);
+            break;
+            }
+            }
+            }
+            return rs;
             } (self.data);*/
 
             var rCh = [],
                 d = self.data;
             for (var j = 0; j < r.length; j++) {
                 for (var i = 0; i < d.length; i++) {
-                    if (d[i][0] === r[j]) { 
+                    loop++;
+                    if (d[i][0] === r[j]) {
                         rCh.push(d[i][1]);
                         break;
                     }
@@ -126,12 +127,15 @@ common.pinyin.makeWord1 = function (str) {
             return;
         }
         for (var i = 0; i < words.length; i++) {
+            loop++;
             if (words[i].length > str.length) continue; //避免多余判断(indexof),增加长度比较,效率略微提升
             if (str.indexOf(words[i]) === 0) {   //new RegExp("^" + words[i]).test(str) 此验证规则执行效率相对的indexof显得巨慢,故采用indexof 
                 var ctr = str.substring(words[i].length, str.length);
-                var key = words[i].replace(/^\w/, function (m) {  //首字母大写,避免比较时候大写(d[i][0].toLocaleLowerCase()) 执行效率(循环的判断越多,越慢)提升
-                    return m.toUpperCase();
-                });
+                var key = words[i][0].toUpperCase() + words[i].substring(1, words[i].length);
+
+                //var key = words[i].replace(/^\w/, function (m) {  //首字母大写,避免比较时候大写(d[i][0].toLocaleLowerCase()) 执行效率(循环的判断越多,越慢)提升
+                //    return m.toUpperCase();
+                //});
                 setArr(ctr, arr, temp + "." + key);
             }
         }
@@ -141,13 +145,14 @@ common.pinyin.makeWord1 = function (str) {
 
     //加上首字母的数组
     re.push(this.makeInitials(str));
-    console.log('spend time:' + (new Date().getTime() - t));
+    console.log('spend time:' + (new Date().getTime() - t) + "   loop:" + loop.toString());
     return re;
 }
 //该函数为makeWord1的原形版,代码略多,执行效率不分上下~~
 common.pinyin.makeWord_1 = function (str) {
     if (!str) return [];
-   
+    var t1 = new Date().getTime();
+    var loop = 0;
     str = str.replace(/\s+/g, '');
     var self = this;
     var words = this.words;
@@ -155,6 +160,7 @@ common.pinyin.makeWord_1 = function (str) {
     var json = { child: [] };
     var setJsonTree = function (str, arr) {
         for (var i = 0; i < words.length; i++) {
+            loop++;
             if (words[i].length > str.length) continue;
             if (str.indexOf(words[i]) === 0) {
                 var key = words[i].replace(/^\w/, function (m) {
@@ -187,7 +193,8 @@ common.pinyin.makeWord_1 = function (str) {
                 d = self.data;
             for (var j = 0; j < r.length; j++) {
                 for (var i = 0; i < d.length; i++) {
-                    if (d[i][0] === r[j]) { 
+                    loop++;
+                    if (d[i][0] === r[j]) {
                         rCh.push(d[i][1]);
                         break;
                     }
@@ -201,19 +208,19 @@ common.pinyin.makeWord_1 = function (str) {
         }
     }
 
-    var t = new Date().getTime();
+
     //生成json树
     setJsonTree(str, json.child);
-    console.log('spend time:' + (new Date().getTime() - t));
+    var t2 = new Date().getTime();
+    console.log('spend time:' + (t2 - t1));
 
-    var t = new Date().getTime();
+
     //根据json生成二维数组
     setArrToA2(json, re);
-    console.log('spend time:' + (new Date().getTime() - t));
 
     //加上首字母的数组
     re.push(this.makeInitials(str));
-    
+    console.log('spend time:' + (new Date().getTime() - t2) + "   loop:" + loop.toString());
     return re;
 }
 
